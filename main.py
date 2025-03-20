@@ -2,7 +2,7 @@ from machine import Pin, ADC, mem32
 from time import sleep
 
 # Pines de los LEDs para los semáforos
-luces_semaforos = [2, 4, 5, 12, 14, 15, 16, 17, 18, 19, 21, 22, 23, 25, 26]
+luces_semaforos = [2, 4, 5, 12, 15, 16, 17, 18, 19, 21, 22, 23, 25, 26]
 bandera = 0  # 0: Semáforo funcionando, 1: Medición de temperatura
 
 # Función para manejar la interrupción del pulsador que cambia entre semáforo y temperatura
@@ -11,7 +11,7 @@ def cambiar_modo(pin):
     bandera = 1 if bandera == 0 else 0  # Alterna entre 0 (semaforo) y 1 (temperatura)
 
 # Configurar el pulsador para cambiar de modo (GPIO25)
-pulsador_modo = Pin(25, Pin.IN, Pin.PULL_UP)
+pulsador_modo = Pin(14, Pin.IN, Pin.PULL_UP)
 pulsador_modo.irq(trigger=Pin.IRQ_RISING, handler=cambiar_modo)
 
 # Configurar el sensor de temperatura LM35
@@ -32,28 +32,29 @@ while True:
         
         print("Semáforo funcionando ☑")
         
-        # 🚦 Fase 1: Vehicular Calle en rojo, giro vehicular en rojo, carr vehicular verde, peatonal calle verde, giro peatonal rojo 
+        # 🚦 Fase 1: Vehicular Calle en rojo, giro vehicular en rojo, carr vehicular verde, peatonal calle verde, giro peatonal verde y carrera peatonal rojo 
         mem32[GPIO_OUT_REG] = 0b0000000110010001000000000000110000
-        sleep(10)
-        
-        # 🚦 Fase 2: Vehicular amarillo en Calle,
-        mem32[GPIO_OUT_REG] = 0b0000000010001001010000000000100100
-        sleep(20)
-
-        # 🚦 Fase 3: Vehicular Calle en Rojo, Carrera en Verde, Extra en Verde, Peatonal Calle en Verde
-        mem32[GPIO_OUT_REG] = 0b00000000000010101000000000000000
-        sleep(3)
-
-        # 🚦 Fase 4: Precaución (Amarillo en Carrera)
-        mem32[GPIO_OUT_REG] = 0b00000000000000101000000000000000
-        sleep(2)
-
-        # 🚦 Fase 5: Peatonales en Verde, Vehiculares en Rojo
-        mem32[GPIO_OUT_REG] = 0b00000000000000000010000000010000
         sleep(5)
 
-        # 🚦 Fase 6: Todo en Rojo antes de reiniciar el ciclo
-        mem32[GPIO_OUT_REG] = 0b00000000000000000000000000000000
+        mem32[GPIO_OUT_REG] = 0b0000000110000001000000000000110100 
+        sleep(5)
+        
+        mem32[GPIO_OUT_REG] = 0b0000000010001001000000000000110100
+        sleep(5)
+        
+         # 🚦 Fase 1: Vehicular Calle en amari, giro vehicular en rojo, carr vehicular amari, peatonal calle verde y rojo, giro peatonal verde y carrera peatonal verde 
+        mem32[GPIO_OUT_REG] = 0b0000000000101000110001000000100000
+        sleep(5)
+
+        mem32[GPIO_OUT_REG] = 0b0000000000101010110001000000000000
+        sleep(5)
+
+         # 🚦 Fase 1: Vehicular Calle en amari, giro vehicular en rojo, carr vehicular amari, peatonal calle verde y rojo, giro peatonal verde y carrera peatonal verde 
+        mem32[GPIO_OUT_REG] = 0b0000000000101010101001000000000000
+        sleep(5)
+
+         # 🚦 Fase 6: Todo en Rojo antes de reiniciar el ciclo
+        mem32[GPIO_OUT_REG] = 0b0000000000000000000000000000000000
         sleep(2)
 
     while bandera == 1:  # Modo Temperatura
